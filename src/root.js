@@ -233,4 +233,3 @@ module.exports = Gun;
 		},1);
 	});
 });*/
-	
