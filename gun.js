@@ -867,10 +867,6 @@
 		Gun.log = function(){ return (!Gun.log.off && console.log.apply(console, arguments)), [].slice.call(arguments).join(' ') }
 		Gun.log.once = function(w,s,o){ return (o = Gun.log.once)[w] = o[w] || 0, o[w]++ || Gun.log(s) }
 
-		;"Please do not remove these messages unless you are paying for a monthly sponsorship, thanks!";
-		Gun.log.once("welcome", "Hello wonderful person! :) Thanks for using GUN, feel free to ask for help on https://gitter.im/amark/gun and ask StackOverflow questions tagged with 'gun'!");
-		;"Please do not remove these messages unless you are paying for a monthly sponsorship, thanks!";
-
 		if(typeof window !== "undefined"){ (window.GUN = window.Gun = Gun).window = window }
 		try{ if(typeof common !== "undefined"){ common.exports = Gun } }catch(e){}
 		module.exports = Gun;
@@ -2082,7 +2078,7 @@
 				}
 				mesh.say.c = mesh.say.d = 0;
 			}());
-			
+
 			// for now - find better place later.
 			function send(raw, peer){ try{
 				var wire = peer.wire;
@@ -2153,7 +2149,7 @@
 					Type.obj.map(tmp, function(msg){
 						mesh.say(msg, peer);
 					}); */
-					// @rogowski 2: I think with my PID fix we can delete this and use the original. 
+					// @rogowski 2: I think with my PID fix we can delete this and use the original.
 					return;
 				}
 				if(peer.pid){ return }
@@ -2167,7 +2163,7 @@
 			});
 
 			root.on('bye', function(peer, tmp){
-				peer = opt.peers[peer.id || peer] || peer; 
+				peer = opt.peers[peer.id || peer] || peer;
 				this.to.next(peer);
 				peer.bye? peer.bye() : (tmp = peer.wire) && tmp.close && tmp.close();
 				Type.obj.del(opt.peers, peer.id);
@@ -2202,7 +2198,7 @@
 		    }
 		    return c; // Math.abs(c);
 		  }
-			
+
 			var $ = JSON.stringify, u;
 
 			Type.obj.hash = function(obj, hash){
