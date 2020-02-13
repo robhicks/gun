@@ -52,11 +52,11 @@
         act.e();
       }
       act.e = function(){
-        act.data.epub = act.pair.epub; 
+        act.data.epub = act.pair.epub;
         SEA.encrypt({priv: act.pair.priv, epriv: act.pair.epriv}, act.proof, act.f, {raw:1}); // to keep the private key safe, we AES encrypt it with the proof of work!
       }
       act.f = function(auth){
-        act.data.auth = JSON.stringify({ek: auth, s: act.salt}); 
+        act.data.auth = JSON.stringify({ek: auth, s: act.salt});
         act.g(act.data.auth);
       }
       act.g = function(auth){ var tmp;
@@ -98,7 +98,7 @@
         var get = (act.list = (act.list||[]).concat(list||[])).shift();
         if(u === get){
           if(act.name){ return act.err('Your user account is not published for dApps to access, please consider syncing it online, or allowing local access by adding your device as a peer.') }
-          return act.err('Wrong user or password.') 
+          return act.err('Wrong user or password.')
         }
         root.get(get).once(act.a);
       }
@@ -255,10 +255,13 @@
               root.user().auth(sS.alias, sS.tmp, cb);
             }
           }
-          }catch(e){}
+          } catch(e){
+            if (typeof cb === 'function') cb({ err: e})
+          }
         }
         return gun;
       }
+      if (typeof cb === 'function') cb({ err: 'recall sessionStorage does not exist'})
       /*
         TODO: copy mhelander's expiry code back in.
         Although, we should check with community,
@@ -326,4 +329,3 @@
       return gun;
     }
     module.exports = User
-  
