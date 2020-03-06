@@ -1,17 +1,22 @@
 ;(function(){
 
-  /* UNBUILD */
-  function USE(arg, req){
-    return req? require(arg) : arg.slice? USE[R(arg)] : function(mod, path){
-      arg(mod = {exports: {}});
-      USE[R(path)] = mod.exports;
-    }
-    function R(p){
-      return p.split('/').slice(-1).toString().replace('.js','');
-    }
-  }
-  if(typeof module !== "undefined"){ var MODULE = module }
-  /* UNBUILD */
+	/* UNBUILD */
+	var root;
+	if(typeof window !== "undefined"){ root = window }
+	if(typeof global !== "undefined"){ root = global }
+	root = root || {};
+	var console = root.console || {log: function(){}};
+	function USE(arg, req){
+		return req? require(arg) : arg.slice? USE[R(arg)] : function(mod, path){
+			arg(mod = {exports: {}});
+			USE[R(path)] = mod.exports;
+		}
+		function R(p){
+			return p.split('/').slice(-1).toString().replace('.js','');
+		}
+	}
+	if(typeof module !== "undefined"){ var common = module }
+	/* UNBUILD */
 
 	;USE(function(module){
     if(typeof window !== "undefined"){ module.window = window }
@@ -19,7 +24,7 @@
 		var AXE = tmp.AXE || function(){};
 
     if(AXE.window = module.window){ AXE.window.AXE = AXE }
-    try{ if(typeof MODULE !== "undefined"){ MODULE.exports = AXE } }catch(e){}
+    try{ if(typeof common !== "undefined"){ common.exports = AXE } }catch(e){}
     module.exports = AXE;
 	})(USE, './root');
   
@@ -27,7 +32,6 @@
 
 		var AXE = USE('./root'), Gun = (AXE.window||{}).Gun || USE('./gun', 1);
 		(Gun.AXE = AXE).GUN = AXE.Gun = Gun;
-    var ST = 0;
 
 		Gun.on('opt', function(at){
 			start(at);
@@ -69,12 +73,11 @@
 				The mob threshold might be determined by other factors,
 				like how much RAM or CPU stress we have.
 			*/
-			opt.mob = opt.mob || 9876 || Infinity;
+			opt.mob = opt.mob || Infinity;
 			var mesh = opt.mesh = opt.mesh || Gun.Mesh(at);
 			console.log("AXE enabled.");
 
 			function verify(dht, msg) {
-				var S = (+new Date);
 				var puts = Object.keys(msg.put);
 				var soul = puts[0]; /// TODO: verify all souls in puts. Copy the msg only with subscribed souls?
 				var subs = dht(soul);
@@ -90,20 +93,17 @@
 				if (opt.super) {
 					dht(soul, tmp.join(','));
 				}
-				console.STAT && console.STAT(S, +new Date - S, 'axe verify');
 			}
 			function route(get){ var tmp;
 				if(!get){ return }
 				if('string' != typeof (tmp = get['#'])){ return }
 				return tmp;
 			}
-			// TODO: AXE NEEDS TO BE CHECKED FOR NEW CODE SYSTEM!!!!!!!!!!
 
 			var Rad = (Gun.window||{}).Radix || USE('./lib/radix', 1);
 			at.opt.dht = Rad();
-			at.on('in', input);
-			function input(msg){
-				var to = this.to, peer = (msg._||'').via; // warning! mesh.leap could be buggy!
+			at.on('in', function input(msg){
+				var to = this.to, peer = (msg._||{}).via;
 				var dht = opt.dht;
 				var routes = axe.routes || (axe.routes = {}); // USE RAD INSTEAD! TMP TESTING!
 				var get = msg.get, hash, tmp;
@@ -128,8 +128,8 @@
 						}
 					}*/
 				}
-				if((tmp = msg['@']) && (tmp = at.dup.s[tmp])){
-					tmp.ack = (tmp.ack || 0) + 1; // count remote ACKs to GET.
+				if((tmp = msg['@']) && (tmp = at.dup.s[tmp]) && (tmp = tmp.it)){
+					(tmp = (tmp._||{})).ack = (tmp.ack || 0) + 1; // count remote ACKs to GET.
 				}
 				to.next(msg);
 
@@ -144,7 +144,7 @@
 						});
 					});
 				}
-			};
+			});
 
 			//try{console.log(req.connection.remoteAddress)}catch(e){};
 			mesh.hear['opt'] = function(msg, peer){
@@ -189,7 +189,6 @@
 						var peers = routes[hash];
 						function chat(peers, old){ // what about optimizing for directed peers?
 							if(!peers){ return chat(opt.peers) }
-							var S = (+new Date); // STATS!
 							var ids = Object.keys(peers); // TODO: BUG! THIS IS BAD PERFORMANCE!!!!
 							var meta = (msg._||yes);
 							clearTimeout(meta.lack);
@@ -199,13 +198,12 @@
 								meta.turn = (meta.turn || 0) + 1;
 								if((old && old[id]) || false === mesh.say(msg, peer)){ ++c }
 							}
-	            console.STAT && (ST = +new Date - S) > 9 && console.STAT(S, ST, 'axe chat');
 							//console.log("AXE:", Gun.obj.copy(msg), meta.turn, c, ids, opt.peers === peers);
 							if(0 < c){
 								if(peers === opt.peers){ return } // prevent infinite lack loop.
 								return meta.turn = 0, chat(opt.peers, peers) 
 							}
-							var hash = msg['##'], ack = meta.ack || at.dup.s[msg['#']];
+							var hash = msg['##'], ack = meta.ack;
 							meta.lack = setTimeout(function(){
 								if(ack && hash && hash === msg['##']){ return }
 								if(meta.turn >= (axe.turns || 3)){ return } // variable for later! Also consider ACK based turn limit.
@@ -217,7 +215,6 @@
 					}
 					// TODO: PUTs need to only go to subs!
 					if(msg.put){
-						var S = (+new Date); // STATS!
 						var routes = axe.routes || (axe.routes = {}); // USE RAD INSTEAD! TMP TESTING!
 						var peers = {};
 						Gun.obj.map(msg.put, function(node, soul){
@@ -226,7 +223,6 @@
 							if(!to){ return }
 							Gun.obj.to(to, peers);
 						});
-						console.STAT && (ST = +new Date - S) > 9 && console.STAT(S, ST, 'axe put');
 						mesh.say(msg, peers);
 						return;
 					}
@@ -250,6 +246,24 @@
 						}
 					});
 				};
+				/*var connections = 0; // THIS HAS BEEN MOVED TO CORE NOW!
+				at.on('hi', function(opt) {
+					this.to.next(opt);
+					//console.log('AXE PEER [HI]', new Date(), opt);
+					connections++;
+					/// The first connection don't need to resubscribe the nodes.
+					if (connections === 1) { return; }
+					/// Resubscribe all nodes.
+					setTimeout(function() {
+						var souls = Object.keys(at.graph);
+						for (var i=0; i < souls.length; ++i) {
+							//at.gun.get(souls[i]).off();
+							at.next[souls[i]].ack = 0;
+							at.gun.get(souls[i]).once(function(){});
+						}
+					//location.reload();
+					}, 500);
+				}, at);*/
 			}
 			axe.up = {};
 			at.on('hi', function(peer){
@@ -259,14 +273,12 @@
 			});
 			at.on('bye', function(peer){ this.to.next(peer);
 				if(peer.url){ delete axe.up[peer.id] }
-				var S = +new Date;
 				Gun.obj.map(peer.routes, function(route, hash){
 					delete route[peer.id];
 					if(Gun.obj.empty(route)){
 						delete axe.routes[hash];
 					}
 				});
-				console.STAT && console.STAT(S, +new Date - S, 'axe bye');
 			});
 
 			// handle rebalancing a mob of peers:

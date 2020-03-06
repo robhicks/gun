@@ -3,7 +3,7 @@ var expect = global.expect = require("./expect");
 var Radix = require('../lib/radix');
 var _ = String.fromCharCode(29);
 
-describe('Radix', function(){ // moved to ./rad/rad.js
+describe('Radix', function(){
   it('read', function(){
 		var rad = Radix();
 		rad('asdf.pub', 'yum');

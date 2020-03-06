@@ -16,6 +16,7 @@
 		******* START AT THE BOTTOM AND READ UP *******
 	*/
 	window.i = 1;
+	window.localStorage = window.localStorage || {clear: function(){}};
 	if(!this.stool){ return }
 	setTimeout(function(){
 		stool.run();
